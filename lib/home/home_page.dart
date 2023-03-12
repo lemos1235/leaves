@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_vpn/flutter_vpn.dart';
+import 'package:flutter_vpn/state.dart';
 import 'package:leaves/model/proxy_servers.dart';
 import 'package:leaves/setting/proxies_page.dart';
 import 'package:provider/provider.dart';
@@ -11,30 +13,56 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  MenuItem? selectedMenu;
+  Proxy? currentProxy;
+
+  bool _isLoading = true;
+
+  FlutterVpnState vpnState = FlutterVpnState.disconnected;
+
+  @override
+  void initState() {
+    super.initState();
+    FlutterVpn.prepare();
+    FlutterVpn.onStateChanged.listen((s) => setState(() => vpnState = s));
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      initProxies();
+    });
+  }
+
+  Future<void> initProxies() async {
+    await context.read<ProxyServers>().initialize();
+    setState(() {
+      _isLoading = false;
+    });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final oldProxy = currentProxy;
+    currentProxy = context.watch<ProxyServers>().getCurrentProxy();
+    if (vpnState == FlutterVpnState.connected && currentProxy != null && currentProxy != oldProxy) {
+      FlutterVpn.switchProxy(proxy: currentProxy!.toProxyUrl());
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    Proxy? proxy = context.watch<ProxyServers>().getCurrentProxy();
     return Scaffold(
       appBar: AppBar(
         actions: [
-          PopupMenuButton<MenuItem>(
-            initialValue: selectedMenu,
+          PopupMenuButton<HomeMenu>(
             // Callback that sets the selected popup menu item.
-            onSelected: (MenuItem item) {
-              setState(() {
-                selectedMenu = item;
-              });
-              if (selectedMenu == MenuItem.proxyServers) {
+            onSelected: (HomeMenu item) {
+              if (item == HomeMenu.proxyServers) {
                 Navigator.of(context).push(MaterialPageRoute(builder: (context) {
                   return ProxiesPage();
                 }));
               }
             },
-            itemBuilder: (BuildContext context) => <PopupMenuEntry<MenuItem>>[
-              const PopupMenuItem<MenuItem>(
-                value: MenuItem.proxyServers,
+            itemBuilder: (BuildContext context) => <PopupMenuEntry<HomeMenu>>[
+              const PopupMenuItem<HomeMenu>(
+                value: HomeMenu.proxyServers,
                 child: Text('配置代理'),
               ),
               // const PopupMenuItem<MenuItem>(
@@ -44,11 +72,14 @@ class _HomePageState extends State<HomePage> {
             ],
           ),
         ],
-        elevation: 0,
       ),
       body: Align(
         alignment: Alignment(0.0, -0.15),
-        child: proxy == null ? goToProxiesSettingButton() : vpnButton(),
+        child: _isLoading
+            ? CircularProgressIndicator()
+            : currentProxy == null
+                ? goToProxiesSettingButton()
+                : vpnButton(),
       ),
     );
   }
@@ -71,17 +102,28 @@ class _HomePageState extends State<HomePage> {
 
   Widget vpnButton() {
     return GestureDetector(
-      onTap: () {},
-      child: Text(
-        "立刻启动",
-        style: TextStyle(
-          fontSize: 36,
-          color: Theme.of(context).primaryColor,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
+      onTap: () {
+        if (vpnState == FlutterVpnState.disconnected) {
+          FlutterVpn.connect(proxy: currentProxy!.toProxyUrl());
+        } else if (vpnState == FlutterVpnState.connected) {
+          FlutterVpn.disconnect();
+        }
+      },
+      child: vpnState == FlutterVpnState.disconnected
+          ? Text("立刻启动",
+              style: TextStyle(
+                fontSize: 36,
+                color: Theme.of(context).primaryColor,
+                fontWeight: FontWeight.bold,
+              ))
+          : Text("停止",
+              style: TextStyle(
+                fontSize: 36,
+                color: Theme.of(context).primaryColor,
+                fontWeight: FontWeight.bold,
+              )),
     );
   }
 }
 
-enum MenuItem { proxyServers, others }
+enum HomeMenu { proxyServers, others }

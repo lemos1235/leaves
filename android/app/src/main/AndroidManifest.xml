@@ -1,5 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="club.lemos.leaves">
+
+   <uses-permission android:name="android.permission.INTERNET" />
+
    <application
         android:label="leaves"
         android:name="${applicationName}"

@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -33,10 +32,13 @@ class MyApp extends StatelessWidget {
         brightness: Brightness.dark,
         primarySwatch: Colors.orange,
         primaryColor: Color(0xFFF97800),
+        cardColor: Color(0xFF303030),
         floatingActionButtonTheme: FloatingActionButtonThemeData(
           backgroundColor: Color(0xFFF97800),
         ),
         appBarTheme: AppBarTheme(
+          centerTitle: true,
+          elevation: 0,
           backgroundColor: Color(0xFF303030),
           foregroundColor: Colors.white,
           iconTheme: IconThemeData(
@@ -51,6 +53,8 @@ class MyApp extends StatelessWidget {
           primarySwatch: Colors.orange,
           primaryColor: Color(0xFFF97800),
           appBarTheme: AppBarTheme(
+            centerTitle: true,
+            elevation: 0,
             backgroundColor: Colors.white,
             foregroundColor: Colors.black,
             iconTheme: IconThemeData(
@@ -80,7 +84,8 @@ class MyApp extends StatelessWidget {
           providers: [
             ChangeNotifierProvider(
               create: (BuildContext context) {
-                return ProxyServers();
+                var proxyServers = ProxyServers();
+                return proxyServers;
               },
             )
           ],
