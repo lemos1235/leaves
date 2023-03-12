@@ -28,10 +28,14 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       debugShowCheckedModeBanner: false,
-      scrollBehavior: CupertinoScrollBehavior(),
+      // scrollBehavior: CupertinoScrollBehavior(),
       darkTheme: ThemeData(
         brightness: Brightness.dark,
+        primarySwatch: Colors.orange,
         primaryColor: Color(0xFFF97800),
+        floatingActionButtonTheme: FloatingActionButtonThemeData(
+          backgroundColor: Color(0xFFF97800),
+        ),
         appBarTheme: AppBarTheme(
           backgroundColor: Color(0xFF303030),
           foregroundColor: Colors.white,

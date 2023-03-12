@@ -35,12 +35,12 @@ class _HomePageState extends State<HomePage> {
             itemBuilder: (BuildContext context) => <PopupMenuEntry<MenuItem>>[
               const PopupMenuItem<MenuItem>(
                 value: MenuItem.proxyServers,
-                child: Text('代理服务器'),
+                child: Text('配置代理'),
               ),
-              const PopupMenuItem<MenuItem>(
-                value: MenuItem.others,
-                child: Text('其它'),
-              ),
+              // const PopupMenuItem<MenuItem>(
+              //   value: MenuItem.others,
+              //   child: Text('其它'),
+              // ),
             ],
           ),
         ],
@@ -48,16 +48,36 @@ class _HomePageState extends State<HomePage> {
       ),
       body: Align(
         alignment: Alignment(0.0, -0.15),
-        child: GestureDetector(
-          onTap: () {},
-          child: Text(
-            "立刻启动",
-            style: TextStyle(
-              fontSize: 36,
-              color: Theme.of(context).primaryColor,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
+        child: proxy == null ? goToProxiesSettingButton() : vpnButton(),
+      ),
+    );
+  }
+
+  Widget goToProxiesSettingButton() {
+    return GestureDetector(
+      onTap: () {
+        Navigator.of(context).push(MaterialPageRoute(builder: (context) => ProxiesPage()));
+      },
+      child: Text(
+        "配置代理",
+        style: TextStyle(
+          fontSize: 28,
+          color: Colors.grey,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
+  }
+
+  Widget vpnButton() {
+    return GestureDetector(
+      onTap: () {},
+      child: Text(
+        "立刻启动",
+        style: TextStyle(
+          fontSize: 36,
+          color: Theme.of(context).primaryColor,
+          fontWeight: FontWeight.bold,
         ),
       ),
     );
