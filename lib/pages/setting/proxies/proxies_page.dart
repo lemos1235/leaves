@@ -3,10 +3,14 @@
 // [Date] 2023/3/12
 //
 import 'package:flutter/material.dart';
-import 'package:leaves/model/proxy_servers.dart';
-import 'package:leaves/setting/proxy_add_page.dart';
-import 'package:leaves/setting/proxy_edit_page.dart';
+import 'package:flutter_vpn/flutter_vpn.dart';
+import 'package:flutter_vpn/state.dart';
+import 'package:leaves/model/proxy.dart';
+import 'package:leaves/providers/proxies_provider.dart';
+import 'package:leaves/pages/setting/proxies/proxy_page.dart';
 import 'package:provider/provider.dart';
+
+enum ProxyItemMenu { edit, delete }
 
 class ProxiesPage extends StatefulWidget {
   const ProxiesPage({Key? key}) : super(key: key);
@@ -16,7 +20,9 @@ class ProxiesPage extends StatefulWidget {
 }
 
 class _ProxiesPageState extends State<ProxiesPage> {
-  late List<ProxyItem> proxyList;
+  late List<Proxy> proxyList;
+
+  final GlobalKey<AnimatedListState> _listKey = GlobalKey<AnimatedListState>();
 
   @override
   void initState() {
@@ -26,7 +32,7 @@ class _ProxiesPageState extends State<ProxiesPage> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    proxyList = context.watch<ProxyServers>().getProxyList();
+    proxyList = context.watch<ProxiesProvider>().getProxyList();
   }
 
   @override
@@ -38,10 +44,9 @@ class _ProxiesPageState extends State<ProxiesPage> {
               scaffoldBackgroundColor: Colors.black,
             )
           : Theme.of(context).copyWith(
-        cardTheme: CardTheme(
-          elevation: 4,
-        )
-      ),
+              cardTheme: CardTheme(
+              elevation: 0.5,
+            )),
       child: Scaffold(
         appBar: AppBar(
           title: Text("代理服务器配置"),
@@ -49,10 +54,13 @@ class _ProxiesPageState extends State<ProxiesPage> {
             Center(
               child: GestureDetector(
                 behavior: HitTestBehavior.translucent,
-                onTap: () {
-                  Navigator.of(context).push(MaterialPageRoute(builder: (context) {
-                    return ProxyAddPage();
+                onTap: () async {
+                  final newProxy = await Navigator.of(context).push(MaterialPageRoute(builder: (context) {
+                    return ProxyEditPage();
                   }));
+                  final index = proxyList.length;
+                  proxyList.insert(index, newProxy);
+                  _listKey.currentState?.insertItem(index);
                 },
                 child: Container(
                   padding: EdgeInsets.all(5),
@@ -71,19 +79,23 @@ class _ProxiesPageState extends State<ProxiesPage> {
             SizedBox(width: 10),
           ],
         ),
-        body: ListView(
-          children: proxyList.map((e) => buildProxyItem(e)).toList(),
+        body: AnimatedList(
+          key: _listKey,
+          itemBuilder: (BuildContext context, int index, Animation<double> animation) {
+            return buildProxyItem(proxyList[index]);
+          },
+          initialItemCount: proxyList.length,
         ),
       ),
     );
   }
 
-  Widget buildProxyItem(ProxyItem proxy) {
+  Widget buildProxyItem(Proxy proxy) {
     final itemBgColor =
         proxy.isCurrent ? Theme.of(context).primaryColor.withOpacity(0.8) : Theme.of(context).cardColor;
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
-      onTap: proxy.isCurrent ? null : () => toggleProxy(proxy),
+      onTap: proxy.isCurrent ? null : () => switchProxy(proxy),
       child: Card(
         color: itemBgColor,
         child: Padding(
@@ -151,7 +163,7 @@ class _ProxiesPageState extends State<ProxiesPage> {
                     child: Row(
                       children: [
                         Text("协议："),
-                        Text(proxy.protocol),
+                        Text(proxy.scheme),
                       ],
                     ),
                   ),
@@ -172,59 +184,76 @@ class _ProxiesPageState extends State<ProxiesPage> {
     );
   }
 
-  void toggleProxy(Proxy proxy) {
-    context.read<ProxyServers>().setCurrent(proxy.id);
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("已切换")));
+  void switchProxy(Proxy proxy) async {
+    context.read<ProxiesProvider>().setCurrentId(proxy.id);
+    final vpnState = await FlutterVpn.currentState;
+    if (vpnState == FlutterVpnState.connected) {
+      FlutterVpn.switchProxy(proxy: proxy.toProxyUri());
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("已切换")));
+    }
   }
 
   void showDeleteSheet(String id) {
+    final padding = MediaQuery.of(context).padding;
+    final themeData = Theme.of(context);
     showModalBottomSheet(
-        context: context,
-        isScrollControlled: true,
-        // useSafeArea: true,
-        builder: (context) {
-          return Container(
-            padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                GestureDetector(
-                  behavior: HitTestBehavior.translucent,
-                  onTap: () {
-                    context.read<ProxyServers>().deleteProxy(id);
-                    Navigator.of(context).pop();
-                  },
-                  child: Container(
-                    width: double.infinity,
-                    alignment: Alignment.center,
-                    padding: EdgeInsets.symmetric(vertical: 15),
-                    child: Text(
-                      "删除",
-                      style: TextStyle(color: Theme.of(context).primaryColor, fontSize: 16, fontWeight: FontWeight.bold),
+      context: context,
+      isScrollControlled: true,
+      builder: (context) {
+        return Container(
+          padding: EdgeInsets.only(bottom: padding.bottom),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              GestureDetector(
+                behavior: HitTestBehavior.translucent,
+                onTap: () {
+                  context.read<ProxiesProvider>().deleteProxy(id);
+                  Navigator.of(context).pop();
+                  final index = proxyList.indexWhere((element) => element.id == id);
+                  final removedItem = proxyList.removeAt(index);
+                  _listKey.currentState?.removeItem(
+                    index,
+                    (context, animation) => SlideTransition(
+                      position: Tween(begin: Offset(1, 0), end: Offset(0, 0)).animate(animation),
+                      child: buildProxyItem(removedItem),
+                    ),
+                  );
+                },
+                child: Container(
+                  width: double.infinity,
+                  alignment: Alignment.center,
+                  padding: EdgeInsets.symmetric(vertical: 15),
+                  child: Text(
+                    "删除",
+                    style: TextStyle(
+                      color: themeData.primaryColor,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
-                Divider(),
-                GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onTap: () {
-                    Navigator.of(context).pop();
-                  },
-                  child: Container(
-                    width: double.infinity,
-                    alignment: Alignment.center,
-                    padding: EdgeInsets.symmetric(vertical: 15),
-                    child: Text(
-                      "取消",
-                      style: TextStyle(fontSize: 16),
-                    ),
+              ),
+              Divider(),
+              GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () {
+                  Navigator.of(context).pop();
+                },
+                child: Container(
+                  width: double.infinity,
+                  alignment: Alignment.center,
+                  padding: EdgeInsets.symmetric(vertical: 15),
+                  child: Text(
+                    "取消",
+                    style: TextStyle(fontSize: 16),
                   ),
                 ),
-              ],
-            ),
-          );
-        });
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 }
-
-enum ProxyItemMenu { edit, delete }

@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
-import 'package:leaves/home/home_page.dart';
-import 'package:leaves/model/proxy_servers.dart';
+import 'package:leaves/hive/hive_boxes.dart';
+import 'package:leaves/pages/home/home_page.dart';
+import 'package:leaves/providers/providers.dart';
 import 'package:provider/provider.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Hive.initFlutter();
+  await HiveBoxes.openBoxes();
   runApp(const MyApp());
 }
 
@@ -38,6 +43,7 @@ class MyApp extends StatelessWidget {
         appBarTheme: AppBarTheme(
           centerTitle: true,
           elevation: 0,
+          color: Color(0xFF303030),
         ),
         cardTheme: const CardTheme(
           shadowColor: Color(0xFF303030),
@@ -78,6 +84,7 @@ class MyApp extends StatelessWidget {
           selectedLabelStyle: TextStyle(fontSize: 12),
         ),
         cardTheme: const CardTheme(
+          shadowColor: Color(0xFFEEEEEE),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(5.0))),
         ),
         bottomSheetTheme: BottomSheetThemeData(
@@ -103,14 +110,7 @@ class MyApp extends StatelessWidget {
       home: const HomePage(),
       builder: (context, child) {
         return MultiProvider(
-          providers: [
-            ChangeNotifierProvider(
-              create: (BuildContext context) {
-                var proxyServers = ProxyServers();
-                return proxyServers;
-              },
-            )
-          ],
+          providers: providers,
           child: child,
         );
       },

@@ -1,9 +1,16 @@
+//
+// [Author] lg (https://github.com/lemos1235)
+// [Date] 2023/3/12
+//
 import 'package:flutter/material.dart';
 import 'package:flutter_vpn/flutter_vpn.dart';
 import 'package:flutter_vpn/state.dart';
-import 'package:leaves/model/proxy_servers.dart';
-import 'package:leaves/setting/proxies_page.dart';
+import 'package:leaves/model/proxy.dart';
+import 'package:leaves/providers/proxies_provider.dart';
+import 'package:leaves/pages/setting/proxies/proxies_page.dart';
 import 'package:provider/provider.dart';
+
+enum HomeMenu { proxies, others }
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -30,7 +37,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> initProxies() async {
-    await context.read<ProxyServers>().initialize();
+    await context.read<ProxiesProvider>().initialize();
     setState(() {
       _isLoading = false;
     });
@@ -39,47 +46,51 @@ class _HomePageState extends State<HomePage> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final oldProxy = currentProxy;
-    currentProxy = context.watch<ProxyServers>().getCurrentProxy();
-    if (vpnState == FlutterVpnState.connected && currentProxy != null && currentProxy != oldProxy) {
-      FlutterVpn.switchProxy(proxy: currentProxy!.toProxyUrl());
-    }
+    currentProxy = context.watch<ProxiesProvider>().getCurrentProxy();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        actions: [
-          PopupMenuButton<HomeMenu>(
-            // Callback that sets the selected popup menu item.
-            onSelected: (HomeMenu item) {
-              if (item == HomeMenu.proxyServers) {
-                Navigator.of(context).push(MaterialPageRoute(builder: (context) {
-                  return ProxiesPage();
-                }));
-              }
-            },
-            itemBuilder: (BuildContext context) => <PopupMenuEntry<HomeMenu>>[
-              const PopupMenuItem<HomeMenu>(
-                value: HomeMenu.proxyServers,
-                child: Text('配置代理'),
-              ),
-              // const PopupMenuItem<MenuItem>(
-              //   value: MenuItem.others,
-              //   child: Text('其它'),
-              // ),
-            ],
-          ),
-        ],
-      ),
-      body: Align(
-        alignment: Alignment(0.0, -0.15),
-        child: _isLoading
-            ? CircularProgressIndicator()
-            : currentProxy == null
-                ? goToProxiesSettingButton()
-                : vpnButton(),
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Theme(
+      data: isDark
+          ? Theme.of(context)
+          : Theme.of(context).copyWith(
+              scaffoldBackgroundColor: Colors.white,
+            ),
+      child: Scaffold(
+        appBar: AppBar(
+          actions: [
+            PopupMenuButton<HomeMenu>(
+              // Callback that sets the selected popup menu item.
+              onSelected: (HomeMenu item) {
+                if (item == HomeMenu.proxies) {
+                  Navigator.of(context).push(MaterialPageRoute(builder: (context) {
+                    return ProxiesPage();
+                  }));
+                }
+              },
+              itemBuilder: (BuildContext context) => <PopupMenuEntry<HomeMenu>>[
+                const PopupMenuItem<HomeMenu>(
+                  value: HomeMenu.proxies,
+                  child: Text('配置代理'),
+                ),
+                // const PopupMenuItem<MenuItem>(
+                //   value: MenuItem.others,
+                //   child: Text('其它'),
+                // ),
+              ],
+            ),
+          ],
+        ),
+        body: Align(
+          alignment: Alignment(0.0, -0.15),
+          child: _isLoading
+              ? CircularProgressIndicator()
+              : currentProxy == null
+                  ? goToProxiesSettingButton()
+                  : vpnButton(),
+        ),
       ),
     );
   }
@@ -104,7 +115,7 @@ class _HomePageState extends State<HomePage> {
     return GestureDetector(
       onTap: () {
         if (vpnState == FlutterVpnState.disconnected) {
-          FlutterVpn.connect(proxy: currentProxy!.toProxyUrl());
+          FlutterVpn.connect(proxy: currentProxy!.toProxyUri());
         } else if (vpnState == FlutterVpnState.connected) {
           FlutterVpn.disconnect();
         }
@@ -125,5 +136,3 @@ class _HomePageState extends State<HomePage> {
     );
   }
 }
-
-enum HomeMenu { proxyServers, others }

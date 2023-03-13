@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:leaves/model/proxy_servers.dart';
+import 'package:leaves/model/proxy.dart';
+import 'package:leaves/providers/proxies_provider.dart';
 import 'package:provider/provider.dart';
 
 class ProxyEditPage extends StatefulWidget {
-  const ProxyEditPage({Key? key, required this.proxy}) : super(key: key);
+  const ProxyEditPage({Key? key, this.proxy}) : super(key: key);
 
-  final Proxy proxy;
+  final Proxy? proxy;
 
   @override
   State<ProxyEditPage> createState() => _ProxyEditPageState();
@@ -26,17 +27,17 @@ class _ProxyEditPageState extends State<ProxyEditPage> {
   @override
   void initState() {
     super.initState();
-    _hostController = TextEditingController(text: widget.proxy.host);
-    _portController = TextEditingController(text: widget.proxy.port.toString());
-    _usernameController = TextEditingController(text: widget.proxy.username);
-    _passwordController = TextEditingController(text: widget.proxy.password);
+    _hostController = TextEditingController(text: widget.proxy?.host);
+    _portController = TextEditingController(text: widget.proxy?.port.toString());
+    _usernameController = TextEditingController(text: widget.proxy?.username);
+    _passwordController = TextEditingController(text: widget.proxy?.password);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("编辑代理服务器"),
+        title: Text("${widget.proxy == null ? '添加' : '编辑'}代理服务器"),
         actions: [
           GestureDetector(
             behavior: HitTestBehavior.translucent,
@@ -90,7 +91,7 @@ class _ProxyEditPageState extends State<ProxyEditPage> {
                     if (value == null || value.isEmpty) {
                       return '请输入端口';
                     }
-                    if(int.parse(value) < 1 || int.parse(value) > 65535) {
+                    if (int.parse(value) < 1 || int.parse(value) > 65535) {
                       return '端口范围须在 1-65535';
                     }
                     return null;
@@ -124,13 +125,23 @@ class _ProxyEditPageState extends State<ProxyEditPage> {
 
   void saveProxy() {
     if (_formKey.currentState!.validate()) {
-      context.read<ProxyServers>().updateProxy(widget.proxy.copyWith(
-            host: _hostController.text,
-            port: int.parse(_portController.text),
-            username: _usernameController.text,
-            password: _passwordController.text,
-          ));
-      Navigator.of(context).pop();
+      if (widget.proxy != null) {
+        context.read<ProxiesProvider>().updateProxy(widget.proxy!.copyWith(
+              host: _hostController.text,
+              port: int.parse(_portController.text),
+              username: _usernameController.text,
+              password: _passwordController.text,
+            ));
+        Navigator.of(context).pop();
+      } else {
+        Proxy newProxy = context.read<ProxiesProvider>().addProxy(
+              host: _hostController.text,
+              port: int.parse(_portController.text),
+              username: _usernameController.text,
+              password: _passwordController.text,
+            );
+        Navigator.of(context).pop(newProxy);
+      }
     }
   }
 }
