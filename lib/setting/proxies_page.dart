@@ -37,7 +37,11 @@ class _ProxiesPageState extends State<ProxiesPage> {
           ? Theme.of(context).copyWith(
               scaffoldBackgroundColor: Colors.black,
             )
-          : Theme.of(context),
+          : Theme.of(context).copyWith(
+        cardTheme: CardTheme(
+          elevation: 4,
+        )
+      ),
       child: Scaffold(
         appBar: AppBar(
           title: Text("代理服务器配置"),
@@ -75,15 +79,13 @@ class _ProxiesPageState extends State<ProxiesPage> {
   }
 
   Widget buildProxyItem(ProxyItem proxy) {
-    final itemBgColor = proxy.isCurrent ? Theme.of(context).primaryColor.withOpacity(0.8) : Theme.of(context).cardColor;
+    final itemBgColor =
+        proxy.isCurrent ? Theme.of(context).primaryColor.withOpacity(0.8) : Theme.of(context).cardColor;
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
-      onTap: () => toggleProxy(proxy),
+      onTap: proxy.isCurrent ? null : () => toggleProxy(proxy),
       child: Card(
         color: itemBgColor,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(5.0),
-        ),
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: 10, vertical: 15),
           child: Column(
@@ -106,7 +108,7 @@ class _ProxiesPageState extends State<ProxiesPage> {
                           );
                         }));
                       } else if (item == ProxyItemMenu.delete) {
-                        context.read<ProxyServers>().deleteProxy(proxy.id);
+                        showDeleteSheet(proxy.id);
                       }
                     },
                     itemBuilder: (BuildContext context) => <PopupMenuEntry<ProxyItemMenu>>[
@@ -172,6 +174,56 @@ class _ProxiesPageState extends State<ProxiesPage> {
 
   void toggleProxy(Proxy proxy) {
     context.read<ProxyServers>().setCurrent(proxy.id);
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("已切换")));
+  }
+
+  void showDeleteSheet(String id) {
+    showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        // useSafeArea: true,
+        builder: (context) {
+          return Container(
+            padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                GestureDetector(
+                  behavior: HitTestBehavior.translucent,
+                  onTap: () {
+                    context.read<ProxyServers>().deleteProxy(id);
+                    Navigator.of(context).pop();
+                  },
+                  child: Container(
+                    width: double.infinity,
+                    alignment: Alignment.center,
+                    padding: EdgeInsets.symmetric(vertical: 15),
+                    child: Text(
+                      "删除",
+                      style: TextStyle(color: Theme.of(context).primaryColor, fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ),
+                Divider(),
+                GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: Container(
+                    width: double.infinity,
+                    alignment: Alignment.center,
+                    padding: EdgeInsets.symmetric(vertical: 15),
+                    child: Text(
+                      "取消",
+                      style: TextStyle(fontSize: 16),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        });
   }
 }
 
