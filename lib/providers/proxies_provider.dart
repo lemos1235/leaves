@@ -32,7 +32,7 @@ class ProxiesProvider with ChangeNotifier {
       if (e.id == currentId) {
         return e.copyWith(isCurrent: true);
       } else {
-        return e;
+        return e.copyWith(isCurrent: false);
       }
     }).toList();
   }

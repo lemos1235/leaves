@@ -58,9 +58,11 @@ class _ProxiesPageState extends State<ProxiesPage> {
                   final newProxy = await Navigator.of(context).push(MaterialPageRoute(builder: (context) {
                     return ProxyEditPage();
                   }));
-                  final index = proxyList.length;
-                  proxyList.insert(index, newProxy);
-                  _listKey.currentState?.insertItem(index);
+                  if (newProxy != null) {
+                    final index = proxyList.length;
+                    proxyList.insert(index, newProxy);
+                    _listKey.currentState?.insertItem(index);
+                  }
                 },
                 child: Container(
                   padding: EdgeInsets.all(5),

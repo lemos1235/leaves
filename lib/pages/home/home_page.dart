@@ -38,6 +38,8 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> initProxies() async {
     await context.read<ProxiesProvider>().initialize();
+    final flutterVpnState = await FlutterVpn.currentState;
+    vpnState = flutterVpnState;
     setState(() {
       _isLoading = false;
     });
