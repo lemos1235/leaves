@@ -72,7 +72,7 @@ class _ProxiesPageState extends State<ProxiesPage> {
                   // ),
                   child: Icon(
                     Icons.add,
-                    color: Theme.of(context).colorScheme.primary,
+                    color: Theme.of(context).primaryColor,
                     size: 30,
                   ),
                 ),

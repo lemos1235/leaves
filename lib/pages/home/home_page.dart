@@ -2,15 +2,18 @@
 // [Author] lg (https://github.com/lemos1235)
 // [Date] 2023/3/12
 //
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_vpn/flutter_vpn.dart';
 import 'package:flutter_vpn/state.dart';
 import 'package:leaves/model/proxy.dart';
+import 'package:leaves/pages/setting/filters/filters_page.dart';
 import 'package:leaves/providers/proxies_provider.dart';
 import 'package:leaves/pages/setting/proxies/proxies_page.dart';
 import 'package:provider/provider.dart';
 
-enum HomeMenu { proxies, others }
+enum HomeMenu { proxies, filters, others }
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -70,6 +73,10 @@ class _HomePageState extends State<HomePage> {
                   Navigator.of(context).push(MaterialPageRoute(builder: (context) {
                     return ProxiesPage();
                   }));
+                } else if (item == HomeMenu.filters) {
+                  Navigator.of(context).push(MaterialPageRoute(builder: (context) {
+                    return FiltersPage();
+                  }));
                 }
               },
               itemBuilder: (BuildContext context) => <PopupMenuEntry<HomeMenu>>[
@@ -77,21 +84,24 @@ class _HomePageState extends State<HomePage> {
                   value: HomeMenu.proxies,
                   child: Text('配置代理'),
                 ),
-                // const PopupMenuItem<MenuItem>(
-                //   value: MenuItem.others,
-                //   child: Text('其它'),
-                // ),
+                if (Platform.isAndroid)
+                  const PopupMenuItem<HomeMenu>(
+                    value: HomeMenu.filters,
+                    child: Text('分应用设置'),
+                  ),
               ],
             ),
           ],
         ),
-        body: Align(
-          alignment: Alignment(0.0, -0.15),
+        body: Container(
+          alignment: Alignment.topCenter,
+          padding: EdgeInsets.symmetric(vertical: 10, horizontal: 0),
           child: _isLoading
-              ? CircularProgressIndicator()
-              : currentProxy == null
-                  ? goToProxiesSettingButton()
-                  : vpnButton(),
+              ? LinearProgressIndicator()
+              : Container(
+                  alignment: Alignment(0.0, -0.15),
+                  child: currentProxy == null ? goToProxiesSettingButton() : vpnButton(),
+                ),
         ),
       ),
     );
@@ -106,7 +116,7 @@ class _HomePageState extends State<HomePage> {
         "配置代理",
         style: TextStyle(
           fontSize: 28,
-          color: Colors.grey,
+          color: Theme.of(context).primaryColor,
           fontWeight: FontWeight.bold,
         ),
       ),
