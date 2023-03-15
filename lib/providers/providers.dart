@@ -3,6 +3,7 @@
 // [Date] 2023/3/13
 //
 import 'package:flutter/material.dart';
+import 'package:leaves/providers/filters_provider.dart';
 import 'package:leaves/providers/proxies_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
@@ -16,4 +17,5 @@ List<SingleChildWidget> get providers => _providers;
 final List<ChangeNotifierProvider<dynamic>> _providers =
 <ChangeNotifierProvider<dynamic>>[
   buildProvider<ProxiesProvider>(ProxiesProvider()),
+  buildProvider<FiltersProvider>(FiltersProvider()),
 ];

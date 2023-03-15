@@ -7,8 +7,10 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_vpn/flutter_vpn.dart';
 import 'package:flutter_vpn/state.dart';
+import 'package:leaves/constant/filter_mode.dart';
 import 'package:leaves/model/proxy.dart';
 import 'package:leaves/pages/setting/filters/filters_page.dart';
+import 'package:leaves/providers/filters_provider.dart';
 import 'package:leaves/providers/proxies_provider.dart';
 import 'package:leaves/pages/setting/proxies/proxies_page.dart';
 import 'package:provider/provider.dart';
@@ -36,6 +38,7 @@ class _HomePageState extends State<HomePage> {
     FlutterVpn.onStateChanged.listen((s) => setState(() => vpnState = s));
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       initProxies();
+      initFilters();
     });
   }
 
@@ -46,6 +49,10 @@ class _HomePageState extends State<HomePage> {
     setState(() {
       _isLoading = false;
     });
+  }
+
+  Future<void> initFilters() async {
+    await context.read<FiltersProvider>().initialize();
   }
 
   @override
@@ -127,7 +134,19 @@ class _HomePageState extends State<HomePage> {
     return GestureDetector(
       onTap: () {
         if (vpnState == FlutterVpnState.disconnected) {
-          FlutterVpn.connect(proxy: currentProxy!.toProxyUri());
+          final filterMode = context.read<FiltersProvider>().getFilterMode();
+          switch (filterMode) {
+            case FilterMode.allow:
+              final apps = context.read<FiltersProvider>().getFilterPackageNames();
+              FlutterVpn.connect(proxy: currentProxy!.toProxyUri(), allowedApps: apps);
+              break;
+            case FilterMode.disallow:
+              final apps = context.read<FiltersProvider>().getFilterPackageNames();
+              FlutterVpn.connect(proxy: currentProxy!.toProxyUri(), disallowedApps: apps);
+              break;
+            default:
+              FlutterVpn.connect(proxy: currentProxy!.toProxyUri());
+          }
         } else if (vpnState == FlutterVpnState.connected) {
           FlutterVpn.disconnect();
         }

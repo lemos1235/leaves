@@ -101,6 +101,9 @@ class MyApp extends StatelessWidget {
           enabledBorder: UnderlineInputBorder(borderSide: const BorderSide(color: Color(0xFFE0E0E0))),
           focusedBorder: UnderlineInputBorder(borderSide: const BorderSide(color: Color(0xFFE0E0E0))),
         ),
+        primaryIconTheme: IconThemeData(
+          color: Color(0xFFC6C6C6),
+        )
       ),
       localizationsDelegates: [
         GlobalMaterialLocalizations.delegate,

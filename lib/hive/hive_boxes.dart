@@ -10,10 +10,12 @@ class HiveBoxes {
   const HiveBoxes._();
 
   static const String proxiesBox = 'proxies';
+  static const String filtersBox = 'filters';
 
   static Future<void> openBoxes() async {
     await Future.wait([
       Hive.openBox(proxiesBox),
+      Hive.openBox(filtersBox),
     ]);
   }
 }
