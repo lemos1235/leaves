@@ -72,17 +72,14 @@ class _FiltersPageState extends State<FiltersPage> {
                   _buildModeSelect(),
                   if (_filterMode != FilterMode.off)
                     Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                        child: ListView.separated(
-                          itemBuilder: (context, index) {
-                            return _buildAppItem(_installedApps[index]);
-                          },
-                          separatorBuilder: (context, index) {
-                            return SizedBox(height: 1);
-                          },
-                          itemCount: _installedApps.length,
-                        ),
+                      child: ListView.separated(
+                        itemBuilder: (context, index) {
+                          return _buildAppItem(_installedApps[index]);
+                        },
+                        separatorBuilder: (context, index) {
+                          return Divider(height: 0);
+                        },
+                        itemCount: _installedApps.length,
                       ),
                     ),
                 ],
@@ -148,21 +145,20 @@ class _FiltersPageState extends State<FiltersPage> {
 
   //应用项
   Widget _buildAppItem(AppInfo app) {
-    return Card(
-      child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 5, vertical: 10),
-        child: SwitchListTile.adaptive(
-          title: Text(app.name!),
-          secondary: Image.memory(app.icon!),
-          value: checkIsInFilters(app),
-          onChanged: (bool value) {
-            if (value) {
-              context.read<FiltersProvider>().addAppToFilters(app.packageName!);
-            } else {
-              context.read<FiltersProvider>().removeAppFromFilters(app.packageName!);
-            }
-          },
-        ),
+    return Container(
+      color: Theme.of(context).cardColor,
+      padding: EdgeInsets.symmetric(horizontal: 5, vertical: 10),
+      child: SwitchListTile.adaptive(
+        title: Text(app.name!),
+        secondary: Image.memory(app.icon!),
+        value: checkIsInFilters(app),
+        onChanged: (bool value) {
+          if (value) {
+            context.read<FiltersProvider>().addAppToFilters(app.packageName!);
+          } else {
+            context.read<FiltersProvider>().removeAppFromFilters(app.packageName!);
+          }
+        },
       ),
     );
   }

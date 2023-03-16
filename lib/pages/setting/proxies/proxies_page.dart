@@ -43,10 +43,7 @@ class _ProxiesPageState extends State<ProxiesPage> {
           ? Theme.of(context).copyWith(
               scaffoldBackgroundColor: Colors.black,
             )
-          : Theme.of(context).copyWith(
-              cardTheme: CardTheme(
-              elevation: 0.5,
-            )),
+          : Theme.of(context),
       child: Scaffold(
         appBar: AppBar(
           title: Text("代理服务器配置"),

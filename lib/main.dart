@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -67,6 +68,7 @@ class MyApp extends StatelessWidget {
           focusedBorder: UnderlineInputBorder(borderSide: const BorderSide(color: Color(0xFF8A8787))),
         ),
       ),
+      scrollBehavior: CupertinoScrollBehavior(),
       theme: ThemeData(
         primarySwatch: Colors.orange,
         primaryColor: Color(0xFFF97800),
