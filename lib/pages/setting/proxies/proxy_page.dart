@@ -52,7 +52,6 @@ class _ProxyEditPageState extends State<ProxyEditPage> {
         ],
       ),
       body: Card(
-        elevation: 5,
         child: Form(
           key: _formKey,
           child: Container(

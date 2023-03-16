@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:leaves/constant/filter_mode.dart';
 import 'package:leaves/providers/filters_provider.dart';
+import 'package:leaves/widgets/card.dart';
 import 'package:provider/provider.dart';
 
 class FilterModesPage extends StatefulWidget {
@@ -31,8 +32,7 @@ class _FilterModesPageState extends State<FilterModesPage> {
       appBar: AppBar(
         title: Text("模式选择"),
       ),
-      body: Column(
-        mainAxisSize: MainAxisSize.min,
+      body: ListSection(
         children: [
           for (final mode in FilterMode.values) ...[
             Container(
@@ -56,8 +56,7 @@ class _FilterModesPageState extends State<FilterModesPage> {
               ),
             ),
             Divider(
-              height: 0,
-              thickness: 0.5,
+              height: 2,
             ),
           ]
         ],

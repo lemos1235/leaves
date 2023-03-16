@@ -50,6 +50,7 @@ class MyApp extends StatelessWidget {
           elevation: 0,
           color: Color(0xFF303030),
         ),
+        dividerColor: Color(0xFF303030),
         cardTheme: const CardTheme(
           shadowColor: Color(0xFF303030),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(5.0))),
@@ -90,6 +91,7 @@ class MyApp extends StatelessWidget {
           selectedLabelStyle: TextStyle(fontSize: 12),
         ),
         cardTheme: const CardTheme(
+          color: Colors.white,
           shadowColor: Color(0xFFEEEEEE),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(5.0))),
         ),
@@ -103,9 +105,9 @@ class MyApp extends StatelessWidget {
           enabledBorder: UnderlineInputBorder(borderSide: const BorderSide(color: Color(0xFFE0E0E0))),
           focusedBorder: UnderlineInputBorder(borderSide: const BorderSide(color: Color(0xFFE0E0E0))),
         ),
-        primaryIconTheme: IconThemeData(
-          color: Color(0xFFC6C6C6),
-        )
+        progressIndicatorTheme: ProgressIndicatorThemeData(
+          color: Color(0xDD000000),
+        ),
       ),
       localizationsDelegates: [
         GlobalMaterialLocalizations.delegate,

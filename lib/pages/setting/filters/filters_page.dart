@@ -9,6 +9,7 @@ import 'package:leaves/constant/filter_mode.dart';
 import 'package:leaves/model/filter_app.dart';
 import 'package:leaves/pages/setting/filters/filter_modes.dart';
 import 'package:leaves/providers/filters_provider.dart';
+import 'package:leaves/widgets/card.dart';
 import 'package:provider/provider.dart';
 
 class FiltersPage extends StatefulWidget {
@@ -25,24 +26,26 @@ class _FiltersPageState extends State<FiltersPage> {
 
   List<FilterApp> _filterApps = [];
 
-  FilterMode _filterMode = FilterMode.off;
+  late FilterMode _filterMode = FilterMode.off;
 
   @override
   void initState() {
     super.initState();
-    initFilters();
+    //获得当前模式
+    _filterMode = context.read<FiltersProvider>().getFilterMode();
+    //初始化应用列表
+    initAppList();
   }
 
-  void initFilters() async {
+  void initAppList() async {
     final installedApps = (await InstalledApps.getInstalledApps(true, true));
     var internalPackageNames = context.read<FiltersProvider>().getInternalPackageNames();
     final visibleApps =
         installedApps.where((element) => !internalPackageNames.contains(element.packageName)).toList();
     context.read<FiltersProvider>().syncFilterAppList(visibleApps);
-    final filterMode = context.read<FiltersProvider>().getFilterMode();
+
     setState(() {
       _installedApps = visibleApps;
-      _filterMode = filterMode;
       _isLoading = false;
     });
   }
@@ -60,85 +63,53 @@ class _FiltersPageState extends State<FiltersPage> {
       appBar: AppBar(
         title: Text("分应用设置"),
       ),
-      body: Container(
-        alignment: Alignment.topCenter,
-        child: _isLoading
-            ? Padding(
-                padding: EdgeInsets.symmetric(vertical: 10, horizontal: 0),
-                child: SizedBox.shrink(),
-              )
-            : Column(
-                children: [
-                  _buildModeSelect(),
-                  if (_filterMode != FilterMode.off)
-                    Expanded(
+      body: Column(
+        children: [
+          _buildModeSelect(),
+          Expanded(
+            child: _filterMode == FilterMode.off
+                ? SizedBox.shrink()
+                : _isLoading
+                    ? Align(alignment: Alignment(0, -0.2), child: CircularProgressIndicator())
+                    : SingleListSection(
                       child: ListView.separated(
                         itemBuilder: (context, index) {
                           return _buildAppItem(_installedApps[index]);
                         },
                         separatorBuilder: (context, index) {
-                          return Divider(height: 0);
+                          return Divider(
+                            height: 2,
+                          );
                         },
                         itemCount: _installedApps.length,
                       ),
                     ),
-                ],
-              ),
+          ),
+        ],
       ),
     );
   }
 
   //模式选择
   Widget _buildModeSelect() {
-    return GestureDetector(
-      onTap: () async {
-        final mode = await Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) {
-              return FilterModesPage(initialMode: _filterMode);
-            },
-          ),
-        );
-        if (mode != null) {
-          setState(() {
-            _filterMode = mode;
-          });
-        }
-      },
-      child: Container(
-        color: Theme.of(context).cardColor,
-        padding: EdgeInsets.symmetric(horizontal: 10, vertical: 18),
-        margin: EdgeInsets.only(bottom: 8, top: 10),
-        child: Row(
-          children: [
-            Container(
-              padding: EdgeInsets.only(right: 20, left: 15),
-              child: Text(
-                "模式选择",
-                style: TextStyle(fontSize: 18),
-              ),
+    return SingleListSection(
+      child: ActionCardTitle(
+        title: "模式选择",
+        accessoryText: _filterMode.title,
+        onTap: () async {
+          final mode = await Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) {
+                return FilterModesPage(initialMode: _filterMode);
+              },
             ),
-            Expanded(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  Text(
-                    _filterMode.title,
-                    style: TextStyle(
-                      fontSize: 18,
-                      height: 1.1,
-                    ),
-                  ),
-                  SizedBox(width: 10),
-                  Icon(
-                    Icons.arrow_forward_ios,
-                    color: Theme.of(context).primaryIconTheme.color,
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
+          );
+          if (mode != null) {
+            setState(() {
+              _filterMode = mode;
+            });
+          }
+        },
       ),
     );
   }
@@ -147,10 +118,10 @@ class _FiltersPageState extends State<FiltersPage> {
   Widget _buildAppItem(AppInfo app) {
     return Container(
       color: Theme.of(context).cardColor,
-      padding: EdgeInsets.symmetric(horizontal: 5, vertical: 10),
+      padding: EdgeInsets.symmetric(vertical: 12),
       child: SwitchListTile.adaptive(
         title: Text(app.name!),
-        secondary: Image.memory(app.icon!),
+        secondary: SizedBox.square(dimension: 50, child: Image.memory(app.icon!)),
         value: checkIsInFilters(app),
         onChanged: (bool value) {
           if (value) {
