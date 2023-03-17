@@ -38,7 +38,9 @@ class _HomePageState extends State<HomePage> {
     FlutterVpn.onStateChanged.listen((s) => setState(() => vpnState = s));
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       initProxies();
-      initFilters();
+      if (Platform.isAndroid) {
+        initFilters();
+      }
     });
   }
 
