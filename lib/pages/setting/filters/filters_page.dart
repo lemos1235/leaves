@@ -98,10 +98,7 @@ class _FiltersPageState extends State<FiltersPage> {
                 child: GestureDetector(
                   behavior: HitTestBehavior.translucent,
                   onTap: () {
-                    setState(() {
-                      _filterMode = mode;
-                      context.read<FiltersProvider>().setFilterMode(_filterMode);
-                    });
+                    updateFilterMode(mode);
                   },
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -110,10 +107,7 @@ class _FiltersPageState extends State<FiltersPage> {
                           value: mode,
                           groupValue: _filterMode,
                           onChanged: (val) {
-                            setState(() {
-                              _filterMode = val!;
-                              context.read<FiltersProvider>().setFilterMode(_filterMode);
-                            });
+                            updateFilterMode(val!);
                           }),
                       Text(mode.title),
                     ],
@@ -124,6 +118,14 @@ class _FiltersPageState extends State<FiltersPage> {
         ),
       ),
     );
+  }
+
+  //更新模式
+  void updateFilterMode(FilterMode mode) {
+    setState(() {
+      _filterMode = mode;
+      context.read<FiltersProvider>().setFilterMode(_filterMode);
+    });
   }
 
   //应用项
