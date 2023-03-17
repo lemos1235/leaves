@@ -17,6 +17,8 @@ import 'package:uuid/uuid.dart';
 class FiltersProvider with ChangeNotifier {
   List<FilterApp> filterAppList = [];
 
+  List<AppInfo> installedAppList = [];
+
   List<String> internalPackageNames = [
     'club.lemos.leaves',
     'com.github.kr328.clash',
@@ -29,12 +31,27 @@ class FiltersProvider with ChangeNotifier {
   Future<void> initialize() async {
     filterAppList = FiltersHive.getFilterAppList();
     currentMode = FiltersHive.getCurrentMode();
+    installedAppList = await initializeInstalledAppList();
     notifyListeners();
   }
 
   //获取内置应用
   List<String> getInternalPackageNames() {
     return internalPackageNames;
+  }
+
+  //初始化已安装应用
+  Future<List<AppInfo>> initializeInstalledAppList() async {
+    final installedApp = (await InstalledApps.getInstalledApps(true, true));
+    final visibleAppList =
+        installedApp.where((element) => !internalPackageNames.contains(element.packageName)).toList();
+    syncFilterAppList(visibleAppList);
+    return visibleAppList;
+  }
+
+  //获取已安装应用列表
+  List<AppInfo> getInstalledAppList() {
+    return installedAppList;
   }
 
   //获取当前模式

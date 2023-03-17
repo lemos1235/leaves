@@ -37,15 +37,10 @@ class _FiltersPageState extends State<FiltersPage> {
     initAppList();
   }
 
-  void initAppList() async {
-    final installedApps = (await InstalledApps.getInstalledApps(true, true));
-    var internalPackageNames = context.read<FiltersProvider>().getInternalPackageNames();
-    final visibleApps =
-        installedApps.where((element) => !internalPackageNames.contains(element.packageName)).toList();
-    context.read<FiltersProvider>().syncFilterAppList(visibleApps);
-
+  void initAppList() {
+    final installedApps = context.read<FiltersProvider>().getInstalledAppList();
     setState(() {
-      _installedApps = visibleApps;
+      _installedApps = installedApps;
       _isLoading = false;
     });
   }

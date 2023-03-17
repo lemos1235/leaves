@@ -36,14 +36,14 @@ class MyApp extends StatelessWidget {
       // scrollBehavior: CupertinoScrollBehavior(),
       darkTheme: ThemeData(
         brightness: Brightness.dark,
-        primarySwatch: Colors.orange,
-        primaryColor: Color(0xFFF97800),
+        primarySwatch: Colors.green,
+        primaryColor: Color(0xFF81C784),
         colorScheme: ColorScheme.dark(
-          primary: Color(0xFFF97800),
-          secondary: Color(0xFFF97800),
+          primary: Color(0xFF81C784),
+          secondary: Color(0xFF81C784),
         ),
         floatingActionButtonTheme: FloatingActionButtonThemeData(
-          backgroundColor: Color(0xFFF97800),
+          backgroundColor: Color(0xFF81C784),
         ),
         appBarTheme: AppBarTheme(
           centerTitle: true,
@@ -71,8 +71,8 @@ class MyApp extends StatelessWidget {
       ),
       scrollBehavior: CupertinoScrollBehavior(),
       theme: ThemeData(
-        primarySwatch: Colors.orange,
-        primaryColor: Color(0xFFF97800),
+        primarySwatch: Colors.green,
+        primaryColor: Color(0xFF81C784),
         appBarTheme: AppBarTheme(
           centerTitle: true,
           elevation: 0,
