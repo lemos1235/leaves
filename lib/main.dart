@@ -31,7 +31,7 @@ class MyApp extends StatelessWidget {
     ));
     Intl.defaultLocale = "zh";
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Leaves',
       debugShowCheckedModeBanner: false,
       // scrollBehavior: CupertinoScrollBehavior(),
       darkTheme: ThemeData(
@@ -40,7 +40,7 @@ class MyApp extends StatelessWidget {
         primaryColor: Color(0xFFF97800),
         colorScheme: ColorScheme.dark(
           primary: Color(0xFFF97800),
-          secondary: Colors.green,
+          secondary: Color(0xFFF97800),
         ),
         floatingActionButtonTheme: FloatingActionButtonThemeData(
           backgroundColor: Color(0xFFF97800),

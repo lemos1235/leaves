@@ -6,8 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:installed_apps/app_info.dart';
 import 'package:installed_apps/installed_apps.dart';
 import 'package:leaves/constant/filter_mode.dart';
+import 'package:leaves/hive/modules/filters_hive.dart';
 import 'package:leaves/model/filter_app.dart';
-import 'package:leaves/pages/setting/filters/filter_modes.dart';
 import 'package:leaves/providers/filters_provider.dart';
 import 'package:leaves/widgets/card.dart';
 import 'package:provider/provider.dart';
@@ -72,18 +72,18 @@ class _FiltersPageState extends State<FiltersPage> {
                 : _isLoading
                     ? Align(alignment: Alignment(0, -0.2), child: CircularProgressIndicator())
                     : SingleListSection(
-                      child: ListView.separated(
-                        itemBuilder: (context, index) {
-                          return _buildAppItem(_installedApps[index]);
-                        },
-                        separatorBuilder: (context, index) {
-                          return Divider(
-                            height: 2,
-                          );
-                        },
-                        itemCount: _installedApps.length,
+                        child: ListView.separated(
+                          itemBuilder: (context, index) {
+                            return _buildAppItem(_installedApps[index]);
+                          },
+                          separatorBuilder: (context, index) {
+                            return Divider(
+                              height: 2,
+                            );
+                          },
+                          itemCount: _installedApps.length,
+                        ),
                       ),
-                    ),
           ),
         ],
       ),
@@ -93,23 +93,40 @@ class _FiltersPageState extends State<FiltersPage> {
   //模式选择
   Widget _buildModeSelect() {
     return SingleListSection(
-      child: ActionCardTitle(
-        title: "模式选择",
-        accessoryText: _filterMode.title,
-        onTap: () async {
-          final mode = await Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) {
-                return FilterModesPage(initialMode: _filterMode);
-              },
-            ),
-          );
-          if (mode != null) {
-            setState(() {
-              _filterMode = mode;
-            });
-          }
-        },
+      child: Container(
+        color: Theme.of(context).cardColor,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            for (final mode in FilterMode.values)
+              Expanded(
+                child: GestureDetector(
+                  behavior: HitTestBehavior.translucent,
+                  onTap: () {
+                    setState(() {
+                      _filterMode = mode;
+                      context.read<FiltersProvider>().setFilterMode(_filterMode);
+                    });
+                  },
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Radio(
+                          value: mode,
+                          groupValue: _filterMode,
+                          onChanged: (val) {
+                            setState(() {
+                              _filterMode = val!;
+                              context.read<FiltersProvider>().setFilterMode(_filterMode);
+                            });
+                          }),
+                      Text(mode.title),
+                    ],
+                  ),
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }
@@ -118,10 +135,10 @@ class _FiltersPageState extends State<FiltersPage> {
   Widget _buildAppItem(AppInfo app) {
     return Container(
       color: Theme.of(context).cardColor,
-      padding: EdgeInsets.symmetric(vertical: 12),
+      padding: EdgeInsets.symmetric(vertical: 10),
       child: SwitchListTile.adaptive(
         title: Text(app.name!),
-        secondary: SizedBox.square(dimension: 50, child: Image.memory(app.icon!)),
+        secondary: SizedBox.square(dimension: 45, child: Image.memory(app.icon!)),
         value: checkIsInFilters(app),
         onChanged: (bool value) {
           if (value) {
