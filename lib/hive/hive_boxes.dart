@@ -4,6 +4,7 @@
 //
 import 'package:hive/hive.dart';
 
+export 'modules/filters_hive.dart';
 export 'modules/proxies_hive.dart';
 
 class HiveBoxes {

@@ -4,9 +4,7 @@
 //
 import 'package:flutter/material.dart';
 import 'package:installed_apps/app_info.dart';
-import 'package:installed_apps/installed_apps.dart';
 import 'package:leaves/constant/filter_mode.dart';
-import 'package:leaves/hive/modules/filters_hive.dart';
 import 'package:leaves/model/filter_app.dart';
 import 'package:leaves/providers/filters_provider.dart';
 import 'package:leaves/widgets/card.dart';

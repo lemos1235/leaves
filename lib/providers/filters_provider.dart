@@ -7,12 +7,8 @@ import 'package:flutter/material.dart';
 import 'package:installed_apps/app_info.dart';
 import 'package:installed_apps/installed_apps.dart';
 import 'package:leaves/constant/filter_mode.dart';
-import 'package:leaves/hive/modules/filters_hive.dart';
-import 'package:leaves/hive/modules/proxies_hive.dart';
+import 'package:leaves/hive/hive_boxes.dart';
 import 'package:leaves/model/filter_app.dart';
-import 'package:leaves/model/proxy.dart';
-import 'package:leaves/pages/setting/filters/filters_page.dart';
-import 'package:uuid/uuid.dart';
 
 class FiltersProvider with ChangeNotifier {
   List<FilterApp> filterAppList = [];

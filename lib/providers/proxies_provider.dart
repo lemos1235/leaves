@@ -4,7 +4,7 @@
 //
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
-import 'package:leaves/hive/modules/proxies_hive.dart';
+import 'package:leaves/hive/hive_boxes.dart';
 import 'package:leaves/model/proxy.dart';
 import 'package:uuid/uuid.dart';
 
